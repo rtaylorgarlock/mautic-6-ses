@@ -1,0 +1,7 @@
+{
+  "name": "Blank",
+  "author": "Mautic team",
+  "authorUrl": "https://mautic.org",
+  "builder": ["legacy", "grapesjsbuilder"],
+  "features": ["page", "email", "form"]
+}

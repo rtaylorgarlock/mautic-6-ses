@@ -1,0 +1,69 @@
+{
+    "name": "klapaudius/oauth-server-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony OAuth Server Bundle",
+    "keywords": ["oauth", "oauth2", "server"],
+    "homepage": "https://github.com/klapaudius/FOSOAuthServerBundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Klapaudius",
+            "email": "klapaudius@gmail.com"
+        },
+        {
+            "name": "Arnaud Le Blanc",
+            "email": "arnaud.lb@gmail.com"
+        },
+        {
+            "name": "FriendsOfSymfony Community",
+            "homepage": "https://github.com/FriendsOfSymfony/FOSOAuthServerBundle/contributors"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "doctrine/doctrine-bundle": "~2.0",
+        "klapaudius/oauth2-php": "~1.4",
+        "symfony/dependency-injection": "~6.0",
+        "symfony/form": "~6.0",
+        "symfony/framework-bundle": "~6.0",
+        "symfony/security-bundle": "~6.0",
+        "symfony/twig-bundle": "~6.0"
+    },
+    "require-dev": {
+        "doctrine/mongodb-odm": "~2.0",
+        "doctrine/orm": "~2.2",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phing/phing": "~2.4",
+        "php-mock/php-mock-phpunit": "~1.0|~2.0",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpunit/phpunit": "~9.0",
+        "symfony/class-loader": "^2.0",
+        "symfony/console": "~6.0",
+        "symfony/phpunit-bridge": "~6.0",
+        "symfony/templating": "~6.0",
+        "symfony/yaml": "~6.0"
+    },
+    "support": {
+        "issues": "https://github.com/klapaudius/FOSOAuthServerBundle/issues"
+    },
+    "suggest": {
+        "doctrine/doctrine-bundle": "*",
+        "doctrine/mongodb-odm-bundle": "*",
+        "symfony/form" : "Needed to be able to use the AuthorizeFormType",
+        "symfony/console": "Needed to be able to use commands"
+    },
+    "autoload": {
+        "psr-4": {
+            "FOS\\OAuthServerBundle\\": ""
+        },
+        "exclude-from-classmap": ["/Tests/"]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0-dev"
+        }
+    }
+}

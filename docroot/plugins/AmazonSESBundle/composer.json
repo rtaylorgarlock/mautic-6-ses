@@ -1,0 +1,29 @@
+{
+    "name": "kuzmany/mautic-amazon-ses",
+    "description": "Mautic 6 plugin that provides Amazon SES as an email transport and callback to process bounces",
+    "type": "mautic-plugin",
+    "require": {
+        "php": ">=8.1.0",
+        "mautic/core-lib": "^6.0",
+        "symfony/amazon-mailer": "6.4.0",
+        "teknasyon-teknoloji/aws-ses-notification": "2.0"
+    },
+    "license": "GPL-3.0-or-later",
+    "keywords": [
+        "mautic",
+        "plugin",
+        "integration",
+        "amazon",
+        "ses"
+    ],
+    "extra": {
+        "install-directory-name": "AmazonSESBundle"
+    },
+    "authors": [
+        {
+            "name": "Pablo Veintimilla",
+            "email": "pabloveintimilla@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}

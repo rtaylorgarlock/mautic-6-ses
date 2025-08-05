@@ -1,0 +1,75 @@
+{
+    "name": "helios-ag/fm-elfinder-bundle",
+    "description": "ElFinder bundle, adds ElFinder file manager to your Symfony project",
+    "keywords": ["elfinder", "file manager", "wysiwyg"],
+    "type": "symfony-bundle",
+    "homepage": "https://github.com/helios-ag/FMElfinderBundle",
+    "minimum-stability": "dev",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Al Ganiev",
+            "email": "helios.ag@gmail.com"
+        },
+        {
+            "name": "Symfony Community",
+            "homepage": "https://github.com/helios-ag/FMElfinderBundle/contributors"
+        }
+    ],
+    "archive": {
+      "exclude": ["/tests", "./github"]
+    },
+    "require": {
+        "php":                                 "^8.1",
+        "ext-json":                            "*",
+        "symfony/framework-bundle":            "^6.4 || ^7.0",
+        "symfony/twig-bundle":                 "^6.4 || ^7.0",
+        "symfony/form":                        "^6.4 || ^7.0",
+        "symfony/asset":                       "^6.4 || ^7.0",
+        "studio-42/elfinder":                  "~2.1.62"
+    },
+    "require-dev" : {
+        "symfony/phpunit-bridge":                           "^6.4 || ^7.0.1",
+        "matthiasnoback/symfony-config-test":               "^6.0",
+        "matthiasnoback/symfony-dependency-injection-test": "^6.0",
+        "symfony/finder":                                   "^6.4 || ^7.0",
+        "php-coveralls/php-coveralls":                      "^2.0",
+        "friendsofphp/php-cs-fixer":                        "dev-master"
+    },
+    "suggest": {
+        "helios-ag/fm-tinymce-bundle": "FMTinyMCEBundle WYSIWYG Editor Bundle",
+        "helios-ag/fm-summernote-bundle": "FMSummernoteBundle WYSIWYG Editor Bundle",
+        "friendsofsymfony/ckeditor-bundle": "FOSCKEditorBundle WYSIWYG Editor Bundle",
+        "barryvdh/elfinder-flysystem-driver": "Flysystem driver for elfinder",
+        "spatie/flysystem-dropbox": "Dropbox 2 Driver for Flysystem"
+    },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": {
+            "symfony/doctrine-bridge": "source",
+            "*": "dist"
+        },
+        "allow-plugins": {
+            "composer/installers": true,
+            "composer/package-versions-deprecated": true,
+            "oomphinc/composer-installers-extender": true
+        }
+    },
+    "autoload": {
+        "psr-4": { "FM\\ElfinderBundle\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "FM\\ElfinderBundle\\Tests\\": "tests/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "13.0-dev"
+        }
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        }
+    }
+}

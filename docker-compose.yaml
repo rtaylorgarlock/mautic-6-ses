@@ -1,0 +1,69 @@
+# docker-compose.yaml for Mautic 6 with AWS SES
+version: '3.8'
+
+services:
+  database:
+    image: percona/percona-server:8.0
+    container_name: mautic_db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      - mautic-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mautic:
+    build: .
+    container_name: mautic_app
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      - MAUTIC_DB_HOST=database
+      - MAUTIC_DB_USER=${MYSQL_USER}
+      - MAUTIC_DB_PASSWORD=${MYSQL_PASSWORD}
+      - MAUTIC_DB_NAME=${MYSQL_DATABASE}
+      - MAUTIC_SITE_URL=${MAUTIC_SITE_URL}
+      - MAUTIC_RUN_CRON_JOBS=false
+      - MAUTIC_TRUSTED_PROXIES=["0.0.0.0/0"]
+      - PHP_INI_MEMORY_LIMIT=512M
+      - PHP_INI_MAX_EXECUTION_TIME=300
+    volumes:
+      # Persist important data directories
+      - mautic_config:/var/www/html/docroot/config
+      - mautic_media:/var/www/html/docroot/media
+      - mautic_logs:/var/www/html/var/logs
+      - mautic_cache:/var/www/html/var/cache
+    networks:
+      - mautic-net
+
+volumes:
+  db_data:
+    driver: local
+  mautic_config:
+    driver: local
+  mautic_media:
+    driver: local
+  mautic_logs:
+    driver: local
+  mautic_cache:
+    driver: local
+
+networks:
+  mautic-net:
+    driver: bridge

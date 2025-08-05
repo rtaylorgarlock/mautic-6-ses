@@ -1,0 +1,59 @@
+//
+// Image
+// --------------------------------------------------
+
+// Image wrapper
+// ------------------------
+.img-wrapper {
+  display: inline-block;
+  position: relative;
+  //overflow: hidden;
+
+  +.img-wrapper {
+    margin-left: 3px;
+  }
+
+  &.pull-right {
+    +.img-wrapper {
+      margin-right: 3px;
+      margin-left: 0;
+    }
+  }
+
+  // inset shadow
+  &:after {
+    position: absolute;
+    content: "";
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: inherit;
+  }
+
+  img {
+    border-radius: inherit;
+    .img-responsive();
+  }
+
+  // label & badge
+  > .label,
+  > .badge {
+    position: absolute;
+    z-index: 5;
+    top: -10px;
+    right: -10px;
+  }
+}
+
+// Image rounded
+// ------------------------
+.img-rounded {
+  border-radius: @border-radius-base;
+}
+
+// Contact avatar
+.contact-avatar {
+  width: 100%;
+}
