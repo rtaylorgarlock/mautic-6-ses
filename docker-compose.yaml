@@ -1,5 +1,5 @@
 # docker-compose.yaml for Mautic 6 with AWS SES
-version: '3.8'
+version: "3.8"
 
 services:
   database:
@@ -19,7 +19,17 @@ services:
     networks:
       - mautic-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p$${MYSQL_ROOT_PASSWORD}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,8 +41,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
-    ports:
-      - "8080:80"
+    #    ports:
+    #      - "8080:80"
     environment:
       - MAUTIC_DB_HOST=database
       - MAUTIC_DB_USER=${MYSQL_USER}
@@ -47,8 +57,8 @@ services:
       # Persist important data directories
       - mautic_config:/var/www/html/docroot/config
       - mautic_media:/var/www/html/docroot/media
-      - mautic_logs:/var/www/html/var/logs
-      - mautic_cache:/var/www/html/var/cache
+      - mautic_logs:/var/www/html/docroot/var/logs
+      - mautic_cache:/var/www/html/docroot/var/cache
     networks:
       - mautic-net
 

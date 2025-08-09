@@ -28,18 +28,22 @@ chown -R www-data:www-data "$MAUTIC_DIR/config"
 
 # Wait for database to be ready
 echo "Waiting for database connection..."
-until php /var/www/html/bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
+until php "$MAUTIC_DIR/bin/console" doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
     echo "Database not ready yet, waiting..."
     sleep 5
 done
 
 # Run database migrations
 echo "Applying database migrations..."
-php /var/www/html/bin/console doctrine:migrations:migrate --no-interaction
+php "$MAUTIC_DIR/bin/console" doctrine:migrations:migrate --no-interaction
 
 # Clear cache
 echo "Clearing Mautic cache..."
-php /var/www/html/bin/console cache:clear
+php "$MAUTIC_DIR/bin/console" cache:clear
+
+# Generate assets (respect PHP_INI_MEMORY_LIMIT if provided)
+echo "Generating Mautic assets..."
+php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} "$MAUTIC_DIR/bin/console" mautic:assets:generate
 
 echo "Entrypoint script finished. Starting application..."
 
