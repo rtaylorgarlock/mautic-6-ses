@@ -70,7 +70,7 @@ Tips:
    - DB wait → migrations → cache clear → assets generation → Apache start.
 
 ## Troubleshooting
-- First-run DB wait loop: If Mautic is not configured yet and the console cannot connect to DB, add a temporary env (e.g. `INITIAL_SKIP_DB_WAIT=true`) and update `docker/entrypoint.sh` to bypass the wait once. Remove after initial setup.
+- First-run DB wait loop: If Mautic is not configured yet and the console cannot connect to DB, set `INITIAL_SKIP_DB_WAIT=true` to bypass the wait on first run. Remove after initial setup.
 - Permissions: Ensure volumes are attached; entrypoint sets ownership recursively on `var/`, `media/`, `config/`.
 - Memory: If assets generation or segments/messages need more memory, raise `PHP_INI_MEMORY_LIMIT`.
 

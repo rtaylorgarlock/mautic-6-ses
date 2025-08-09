@@ -26,12 +26,16 @@ chown -R www-data:www-data "$MAUTIC_DIR/var"
 chown -R www-data:www-data "$MAUTIC_DIR/media"
 chown -R www-data:www-data "$MAUTIC_DIR/config"
 
-# Wait for database to be ready
-echo "Waiting for database connection..."
-until php "$MAUTIC_DIR/bin/console" doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
-    echo "Database not ready yet, waiting..."
-    sleep 5
-done
+# Wait for database to be ready (skippable on first-run)
+if [ "${INITIAL_SKIP_DB_WAIT}" = "true" ] || [ "${INITIAL_SKIP_DB_WAIT}" = "1" ]; then
+    echo "INITIAL_SKIP_DB_WAIT is set; skipping DB readiness wait for first run."
+else
+    echo "Waiting for database connection..."
+    until php "$MAUTIC_DIR/bin/console" doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
+        echo "Database not ready yet, waiting..."
+        sleep 5
+    done
+fi
 
 # Run database migrations
 echo "Applying database migrations..."
