@@ -14,55 +14,44 @@ This project follows the Mautic "recommended-project" layout (web root is `docro
 - Cron is managed by Coolify Scheduled Jobs (not inside the container).
 
 ## Environment variables (Coolify App UI)
-Set at minimum:
-- `MAUTIC_DB_HOST` – database host/service name
-- `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` – DB credentials for Mautic
-- `MAUTIC_SITE_URL` – public URL (e.g., `https://mautic.example.com`)
-- `MAUTIC_RUN_CRON_JOBS=false` – cron handled by Coolify jobs
-
-Recommended:
-- `MAUTIC_TRUSTED_PROXIES=["0.0.0.0/0"]`
-- `PHP_INI_MEMORY_LIMIT=512M`
-- `PHP_INI_MAX_EXECUTION_TIME=300`
-
-### Quick copy/paste for first deploy
-Paste these into Coolify → Application → Environment variables, then adjust the placeholders:
+Use this starter set, adjust placeholders, and mark secrets as hidden in Coolify:
 
 ```bash
-# Database
-MYSQL_ROOT_PASSWORD=change-me-root-$(openssl rand -hex 16)
+# Required
+MAUTIC_DB_HOST=database          # must match docker-compose service name
 MYSQL_DATABASE=mautic
 MYSQL_USER=mautic
 MYSQL_PASSWORD=change-me-app-$(openssl rand -hex 16)
+MAUTIC_SITE_URL=https://mautic.example.com
+MAUTIC_RUN_CRON_JOBS=false       # cron handled by Coolify Scheduled Jobs
 
-# Mautic / Symfony
-MAUTIC_DB_HOST=database          # matches the docker-compose service name
+# Recommended
+PHP_INI_MEMORY_LIMIT=512M
+PHP_INI_MAX_EXECUTION_TIME=300
+MAUTIC_TRUSTED_PROXIES=["0.0.0.0/0"]
+
+# First deploy helpers (remove/flip after install)
+INITIAL_SKIP_DB_WAIT=true
+
+# Symfony runtime
 APP_ENV=prod
 APP_SECRET=$(openssl rand -hex 32)
 
-# URL / reverse proxy
-MAUTIC_SITE_URL=https://mautic.example.com
-MAUTIC_TRUSTED_PROXIES=["0.0.0.0/0"]
+# If your Compose uses the built-in DB service, include root password
+MYSQL_ROOT_PASSWORD=change-me-root-$(openssl rand -hex 16)
 
-# PHP runtime
-PHP_INI_MEMORY_LIMIT=512M
-PHP_INI_MAX_EXECUTION_TIME=300
-
-# Operations
-MAUTIC_RUN_CRON_JOBS=false       # Coolify Scheduled Jobs will run cron
-INITIAL_SKIP_DB_WAIT=true        # first deploy only; remove/flip to false afterward
-
-# Outbound email (AWS SES example)
-# Replace with your real creds and region; mark this as hidden/sensitive in Coolify.
-# MAILER_DSN supports Symfony Mailer DSNs; example for SES HTTP transport:
+# Outbound email (AWS SES example; mark as hidden)
+# MAILER_DSN supports provider-specific DSNs; SES HTTP example:
 MAILER_DSN=ses+https://AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY@default?region=us-east-1
+# Alternative SMTP example:
+# MAILER_DSN=smtp://USERNAME:PASSWORD@smtp.example.com:587?encryption=tls
 ```
 
 Notes:
-- __MAUTIC_DB_HOST__: use `database` (the Compose service name in `docker-compose.yaml`).
-- __Passwords/secret__: generate unique values; never commit them. In Coolify, mark sensitive fields as hidden.
-- __INITIAL_SKIP_DB_WAIT__: only to get through very first boot; remove or set to `false` after install completes.
-- __MAILER_DSN__: adjust region/keys to match AWS; if using another provider, use its DSN.
+- __MAUTIC_DB_HOST__: use `database` (Compose service name in `docker-compose.yaml`).
+- __Secrets__: generate per-env values (openssl examples above); never commit them.
+- __INITIAL_SKIP_DB_WAIT__: only to pass first boot before DB is reachable/configured.
+- __MAILER_DSN__: pick SES or SMTP (or your provider’s DSN) and set correct region/host.
 
 ## Persistent volumes (Coolify App UI)
 Map these paths to persistent volumes:
