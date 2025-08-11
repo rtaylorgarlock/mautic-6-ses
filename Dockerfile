@@ -12,7 +12,7 @@ RUN composer install --no-interaction --no-dev --optimize-autoloader --no-script
 # ==> Stage 2: Build the final Mautic image
 FROM mautic/mautic:6-apache
 WORKDIR /var/www/html
-RUN rm -rf .
+RUN rm -rf vendor || true
 COPY --from=vendor /app/vendor/ ./vendor/
 COPY . .
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
