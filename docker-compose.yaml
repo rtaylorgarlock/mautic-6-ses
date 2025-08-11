@@ -7,10 +7,10 @@ services:
     container_name: mautic_db
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?required}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:?required}
+      - MYSQL_USER=${MYSQL_USER:?required}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:?required}
     volumes:
       - db_data:/var/lib/mysql
     command:
@@ -45,14 +45,16 @@ services:
     #      - "8080:80"
     environment:
       - MAUTIC_DB_HOST=database
-      - MAUTIC_DB_USER=${MYSQL_USER}
-      - MAUTIC_DB_PASSWORD=${MYSQL_PASSWORD}
-      - MAUTIC_DB_NAME=${MYSQL_DATABASE}
-      - MAUTIC_SITE_URL=${MAUTIC_SITE_URL}
+      - MAUTIC_DB_USER=${MYSQL_USER:?required}
+      - MAUTIC_DB_PASSWORD=${MYSQL_PASSWORD:?required}
+      - MAUTIC_DB_NAME=${MYSQL_DATABASE:?required}
+      - MAUTIC_SITE_URL=${MAUTIC_SITE_URL:?required}
       - MAUTIC_RUN_CRON_JOBS=false
       - MAUTIC_TRUSTED_PROXIES=["0.0.0.0/0"]
       - PHP_INI_MEMORY_LIMIT=512M
       - PHP_INI_MAX_EXECUTION_TIME=300
+      - APP_ENV=prod
+      - APP_SECRET=${APP_SECRET:?required}
     volumes:
       # Persist important data directories
       - mautic_config:/var/www/html/docroot/config
