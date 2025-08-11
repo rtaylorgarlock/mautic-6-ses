@@ -15,7 +15,12 @@ WORKDIR /var/www/html
 RUN rm -rf vendor || true
 COPY --from=vendor /app/vendor/ ./vendor/
 COPY . .
+# Point Apache to the recommended-project web root
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/docroot
+RUN set -eux; \
+    sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/*.conf || true; \
+    sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf || true
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["/docker-entrypoint.sh", "apache2-foreground"]
+CMD ["apache2-foreground"]
