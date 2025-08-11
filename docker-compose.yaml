@@ -25,14 +25,14 @@ services:
           "mysqladmin",
           "ping",
           "-h",
-          "localhost",
-          "-u",
-          "root",
+          "127.0.0.1",
+          "-uroot",
           "-p$${MYSQL_ROOT_PASSWORD}",
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      start_period: 60s
+      interval: 5s
+      timeout: 3s
+      retries: 30
 
   mautic:
     build: .
