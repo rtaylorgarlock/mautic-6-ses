@@ -8,10 +8,10 @@ WEB_DIR="$APP_DIR/docroot"
 
 echo "Running Mautic entrypoint script..."
 
-# Detect installation by presence of real local.php
+# Detect installation by presence of real local.php at project config
 echo "Checking for local.php config file..."
-if [ -f "$WEB_DIR/config/local.php" ]; then
-    if grep -q "Local configuration stub" "$WEB_DIR/config/local.php" 2>/dev/null; then
+if [ -f "$APP_DIR/config/local.php" ]; then
+    if grep -q "Local configuration stub" "$APP_DIR/config/local.php" 2>/dev/null; then
         INSTALLED=0
         echo "local.php looks like a stub; treating as NOT installed."
     else
@@ -25,14 +25,15 @@ fi
 
 # Create var directory if it doesn't exist and set permissions
 echo "Setting up var directory and permissions..."
+mkdir -p "$APP_DIR/config"
 mkdir -p "$WEB_DIR/var/cache"
 mkdir -p "$WEB_DIR/var/logs" 
 mkdir -p "$WEB_DIR/var/tmp"
 
 # Set permissions on directories that need to be writable
+chown -R www-data:www-data "$APP_DIR/config"
 chown -R www-data:www-data "$WEB_DIR/var"
 chown -R www-data:www-data "$WEB_DIR/media"
-chown -R www-data:www-data "$WEB_DIR/config"
 
 if [ "$INSTALLED" -eq 1 ]; then
     # Wait for database to be ready (skippable via flag)
