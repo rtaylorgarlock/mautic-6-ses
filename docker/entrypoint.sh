@@ -8,12 +8,14 @@ WEB_DIR="$APP_DIR/docroot"
 
 echo "Running Mautic entrypoint script..."
 
-# Create missing $WEB_DIR/config/local.php if it does not exist
+# Detect installation by presence of real local.php
 echo "Checking for local.php config file..."
-if [ ! -f "$WEB_DIR/config/local.php" ]; then
-    echo "Creating missing local.php config file..."
-    touch "$WEB_DIR/config/local.php"
-    echo "<?php\n// Local configuration stub\nreturn [];" > "$WEB_DIR/config/local.php"
+if [ -f "$WEB_DIR/config/local.php" ]; then
+    INSTALLED=1
+    echo "local.php found; assuming Mautic is installed."
+else
+    INSTALLED=0
+    echo "local.php not found; Mautic not installed yet. Skipping DB ops; proceed with web installer."
 fi
 
 # Create var directory if it doesn't exist and set permissions
@@ -27,28 +29,32 @@ chown -R www-data:www-data "$WEB_DIR/var"
 chown -R www-data:www-data "$WEB_DIR/media"
 chown -R www-data:www-data "$WEB_DIR/config"
 
-# Wait for database to be ready (skippable on first-run)
-if [ "${INITIAL_SKIP_DB_WAIT}" = "true" ] || [ "${INITIAL_SKIP_DB_WAIT}" = "1" ]; then
-    echo "INITIAL_SKIP_DB_WAIT is set; skipping DB readiness wait for first run."
+if [ "$INSTALLED" -eq 1 ]; then
+    # Wait for database to be ready (skippable via flag)
+    if [ "${INITIAL_SKIP_DB_WAIT}" = "true" ] || [ "${INITIAL_SKIP_DB_WAIT}" = "1" ]; then
+        echo "INITIAL_SKIP_DB_WAIT is set; skipping DB readiness wait for this run."
+    else
+        echo "Waiting for database connection..."
+        until php "$APP_DIR/bin/console" doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
+            echo "Database not ready yet, waiting..."
+            sleep 5
+        done
+    fi
+
+    # Run database migrations
+    echo "Applying database migrations..."
+    php "$APP_DIR/bin/console" doctrine:migrations:migrate --no-interaction
+
+    # Clear cache
+    echo "Clearing Mautic cache..."
+    php "$APP_DIR/bin/console" cache:clear
+
+    # Generate assets (respect PHP_INI_MEMORY_LIMIT if provided)
+    echo "Generating Mautic assets..."
+    php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} "$APP_DIR/bin/console" mautic:assets:generate
 else
-    echo "Waiting for database connection..."
-    until php "$APP_DIR/bin/console" doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
-        echo "Database not ready yet, waiting..."
-        sleep 5
-    done
+    echo "Mautic not installed; skip migrations and cache tasks."
 fi
-
-# Run database migrations
-echo "Applying database migrations..."
-php "$APP_DIR/bin/console" doctrine:migrations:migrate --no-interaction
-
-# Clear cache
-echo "Clearing Mautic cache..."
-php "$APP_DIR/bin/console" cache:clear
-
-# Generate assets (respect PHP_INI_MEMORY_LIMIT if provided)
-echo "Generating Mautic assets..."
-php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} "$APP_DIR/bin/console" mautic:assets:generate
 
 echo "Entrypoint script finished. Starting application..."
 
