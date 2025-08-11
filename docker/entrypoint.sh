@@ -11,8 +11,13 @@ echo "Running Mautic entrypoint script..."
 # Detect installation by presence of real local.php
 echo "Checking for local.php config file..."
 if [ -f "$WEB_DIR/config/local.php" ]; then
-    INSTALLED=1
-    echo "local.php found; assuming Mautic is installed."
+    if grep -q "Local configuration stub" "$WEB_DIR/config/local.php" 2>/dev/null; then
+        INSTALLED=0
+        echo "local.php looks like a stub; treating as NOT installed."
+    else
+        INSTALLED=1
+        echo "local.php found; assuming Mautic is installed."
+    fi
 else
     INSTALLED=0
     echo "local.php not found; Mautic not installed yet. Skipping DB ops; proceed with web installer."
