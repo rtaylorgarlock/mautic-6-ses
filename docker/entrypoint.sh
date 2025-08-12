@@ -64,5 +64,9 @@ fi
 
 echo "Entrypoint script finished. Starting application..."
 
-# Finally exec the incoming CMD
-exec "$@"
+# Hand off to the base image entrypoint for proper PHP/Apache initialization
+if [ -x "/usr/local/bin/docker-php-entrypoint" ]; then
+  exec /usr/local/bin/docker-php-entrypoint "$@"
+else
+  exec "$@"
+fi
