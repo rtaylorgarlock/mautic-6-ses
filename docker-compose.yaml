@@ -59,8 +59,8 @@ services:
       # Persist important data directories
       - mautic_config:/var/www/html/config
       - mautic_media:/var/www/html/docroot/media
-      - mautic_logs:/var/www/html/docroot/var/logs
-      - mautic_cache:/var/www/html/docroot/var/cache
+      - mautic_logs:/var/www/html/var/logs
+      - mautic_cache:/var/www/html/var/cache
     networks:
       - mautic-net
 

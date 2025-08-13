@@ -24,6 +24,9 @@ RUN set -eux; \
 # Ensure both paths work for config: docroot/config -> ../config
 RUN ln -sfn ../config docroot/config
 
+# Ensure both paths work for var (cache/logs/tmp): docroot/var -> ../var
+RUN ln -sfn ../var docroot/var
+
 # Enable rewrite and set a default ServerName to silence warnings
 RUN a2enmod rewrite && echo "ServerName localhost" > /etc/apache2/conf-enabled/servername.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh

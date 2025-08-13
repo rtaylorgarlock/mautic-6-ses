@@ -23,17 +23,17 @@ else
     echo "local.php not found; Mautic not installed yet. Skipping DB ops; proceed with web installer."
 fi
 
-# Create var directory if it doesn't exist and set permissions
+# Create var directories in APP_DIR and set permissions (symlink docroot/var -> ../var may exist)
 echo "Setting up var directory and permissions..."
 mkdir -p "$APP_DIR/config"
-mkdir -p "$WEB_DIR/var/cache"
-mkdir -p "$WEB_DIR/var/logs" 
-mkdir -p "$WEB_DIR/var/tmp"
+mkdir -p "$APP_DIR/var/cache" "$APP_DIR/var/logs" "$APP_DIR/var/tmp"
 
-# Set permissions on directories that need to be writable
-chown -R www-data:www-data "$APP_DIR/config"
-chown -R www-data:www-data "$WEB_DIR/var"
-chown -R www-data:www-data "$WEB_DIR/media"
+# Set ownership and permissions on writable paths
+chown -R www-data:www-data "$APP_DIR/config" "$APP_DIR/var"
+chown -R www-data:www-data "$WEB_DIR/media" || true
+# Ensure permissive modes for Symfony cache/logs
+find "$APP_DIR/var" -type d -exec chmod 775 {} \; 2>/dev/null || true
+find "$APP_DIR/var" -type f -exec chmod 664 {} \; 2>/dev/null || true
 
 if [ "$INSTALLED" -eq 1 ]; then
     # Wait for database to be ready (skippable via flag)
@@ -58,6 +58,10 @@ if [ "$INSTALLED" -eq 1 ]; then
     # Generate assets (respect PHP_INI_MEMORY_LIMIT if provided)
     echo "Generating Mautic assets..."
     php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} "$APP_DIR/bin/console" mautic:assets:generate
+    # Fix ownership/permissions after console tasks (which may run as root)
+    chown -R www-data:www-data "$APP_DIR/var" "$WEB_DIR/media" || true
+    find "$APP_DIR/var" -type d -exec chmod 775 {} \; 2>/dev/null || true
+    find "$APP_DIR/var" -type f -exec chmod 664 {} \; 2>/dev/null || true
 else
     echo "Mautic not installed; skip migrations and cache tasks."
 fi
