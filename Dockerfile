@@ -20,6 +20,12 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/docroot
 RUN set -eux; \
     sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/*.conf || true; \
     sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf || true
+    
+# Ensure both paths work for config: docroot/config -> ../config
+RUN ln -sfn ../config docroot/config
+
+# Enable rewrite and set a default ServerName to silence warnings
+RUN a2enmod rewrite && echo "ServerName localhost" > /etc/apache2/conf-enabled/servername.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
