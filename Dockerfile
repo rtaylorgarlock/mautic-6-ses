@@ -27,8 +27,10 @@ RUN ln -sfn ../config docroot/config
 # Ensure both paths work for var (cache/logs/tmp): docroot/var -> ../var
 RUN ln -sfn ../var docroot/var
 
-# Enable rewrite and set a default ServerName to silence warnings
-RUN a2enmod rewrite && echo "ServerName localhost" > /etc/apache2/conf-enabled/servername.conf
+# Enable rewrite/proxy and set a default ServerName to silence warnings
+RUN a2enmod rewrite proxy proxy_http && echo "ServerName localhost" > /etc/apache2/conf-enabled/servername.conf
+# Route /sns/* to the internal sns-bridge service
+COPY docker/apache-sns-proxy.conf /etc/apache2/conf-enabled/sns-proxy.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

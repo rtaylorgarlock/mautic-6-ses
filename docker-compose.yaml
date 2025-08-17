@@ -16,8 +16,6 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-    networks:
-      - mautic-net
     healthcheck:
       test:
         [
@@ -33,6 +31,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 30
+
+  sns-bridge:
+    build: ./services/sns-bridge
+    container_name: mautic_sns_bridge
+    restart: always
+    environment:
+      - MAUTIC_BASE_URL=${MAUTIC_SITE_URL:?required}
+      - MAUTIC_API_USERNAME=${MAUTIC_API_USERNAME:?required}
+      - MAUTIC_API_PASSWORD=${MAUTIC_API_PASSWORD:?required}
+      - SNS_TOPIC_ARNS=${SNS_TOPIC_ARNS:-}
+      - CREATE_CONTACT_IF_MISSING=false
+      - LOG_LEVEL=INFO
 
   mautic:
     build: .
@@ -61,9 +71,6 @@ services:
       - mautic_media:/var/www/html/docroot/media
       - mautic_logs:/var/www/html/var/logs
       - mautic_cache:/var/www/html/var/cache
-    networks:
-      - mautic-net
-
 volumes:
   db_data:
     driver: local
@@ -75,7 +82,3 @@ volumes:
     driver: local
   mautic_cache:
     driver: local
-
-networks:
-  mautic-net:
-    driver: bridge

@@ -55,35 +55,63 @@ Notes:
 
 ## Persistent volumes (Coolify App UI)
 Map these paths to persistent volumes:
-- `/var/www/html/docroot/config`
+- `/var/www/html/config`
 - `/var/www/html/docroot/media`
-- `/var/www/html/docroot/var/logs`
-- `/var/www/html/docroot/var/cache`
+- `/var/www/html/var/logs`
+- `/var/www/html/var/cache`
 
 ## Scheduled Jobs (Coolify)
 Create scheduled jobs that exec inside the container. Suggested intervals and commands:
 
 - Segments update (every 5 min):
   ```bash
-  php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} /var/www/html/docroot/bin/console mautic:segments:update --batch-limit=500
+  php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} /var/www/html/bin/console mautic:segments:update --batch-limit=500
   ```
 - Campaigns update (every 5–10 min):
   ```bash
-  php /var/www/html/docroot/bin/console mautic:campaigns:update --batch-limit=500
+  php /var/www/html/bin/console mautic:campaigns:update --batch-limit=500
   ```
 - Campaigns trigger (every 5–10 min, offset by a couple of minutes from update):
   ```bash
-  php /var/www/html/docroot/bin/console mautic:campaigns:trigger --batch-limit=500
+  php /var/www/html/bin/console mautic:campaigns:trigger --batch-limit=500
   ```
 - Messages send (every 5–15 min):
   ```bash
-  php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} /var/www/html/docroot/bin/console mautic:messages:send --batch-limit=500
+  php -d memory_limit=${PHP_INI_MEMORY_LIMIT:-512M} /var/www/html/bin/console mautic:messages:send --batch-limit=500
   ```
 
 Optional jobs:
 - Email fetch (IMAP): `php /var/www/html/docroot/bin/console mautic:email:fetch`
-- Imports: `php /var/www/html/docroot/bin/console mautic:import`
-- Broadcasts: `php /var/www/html/docroot/bin/console mautic:broadcasts:send`
+- Imports: `php /var/www/html/bin/console mautic:import`
+- Broadcasts: `php /var/www/html/bin/console mautic:broadcasts:send`
+
+## Optional: AWS SNS bounce/complaint bridge
+This repo includes a lightweight FastAPI microservice that validates AWS SNS signatures and marks Contacts as Do Not Contact (DNC) in Mautic when SES reports bounces or complaints.
+
+Endpoint route (proxied by Apache inside the app container):
+- `https://<your-mautic-domain>/sns/notify`
+
+App environment (Coolify → App → Environment):
+- `MAUTIC_API_USERNAME` (required for SNS bridge)
+- `MAUTIC_API_PASSWORD` (required for SNS bridge)
+- `SNS_TOPIC_ARNS` (optional, comma-separated allowlist of Topic ARNs)
+
+Mautic configuration (inside Mautic UI):
+- Settings → Configuration → API
+  - Enable API: Yes
+  - Enable Basic Auth: Yes (used by the bridge)
+
+AWS setup (SES + SNS):
+1) Create an SNS topic for SES bounces/complaints (or separate topics).
+2) In SES (Configuration set or Verified identity), add an Event destination → SNS, enable Bounce and Complaint, and select your topic(s).
+3) In SNS, add an HTTPS subscription pointing to `https://<your-mautic-domain>/sns/notify`.
+   - The bridge auto-confirms `SubscriptionConfirmation`.
+4) Optionally set `SNS_TOPIC_ARNS` to the topic ARN(s) to restrict which SNS messages are accepted.
+
+Behavior:
+- Bounce → DNC reason 2 (BOUNCED) on the contact's email channel.
+- Complaint → DNC reason 1 (UNSUBSCRIBED).
+- If a contact is not found, it is skipped by default (set `CREATE_CONTACT_IF_MISSING=true` in the bridge if desired).
 
 Tips:
 - Stagger job schedules slightly to reduce contention.

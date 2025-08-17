@@ -2,6 +2,24 @@
 
 This project follows a pragmatic variant of "Keep a Changelog" to capture not only code changes but also key decisions and current state for GitOps-friendly deployments.
 
+## [0.2.0] - 2025-08-13
+
+### Added
+- SNS bridge microservice at `services/sns-bridge/` (FastAPI) that validates AWS SNS and marks Contacts DNC via Mautic REST API.
+- Apache reverse proxy config `docker/apache-sns-proxy.conf` to expose the bridge at `https://<mautic-domain>/sns/*`.
+- `sns-bridge` service added to `docker-compose.yaml`; shares the app network.
+
+### Changed
+- Dockerfile: enable `proxy` and `proxy_http` modules; include SNS proxy conf; add `docroot/var -> ../var` symlink for runtime paths consistency.
+- docker-compose.yaml: corrected volume mount points to `/var/www/html/var/{logs,cache}` (project root) to match where Symfony writes.
+- Entrypoint: create/chown `APP_DIR/var/{cache,logs,tmp}` and re-chown after console tasks.
+- Docs (`docs/coolify.md`): updated volume paths and console path to `/var/www/html/bin/console`. Added SNS bridge setup section (API Basic Auth, SNS topic subscription).
+
+### Notes
+- Set `MAUTIC_API_USERNAME` and `MAUTIC_API_PASSWORD` in Coolify when enabling the SNS bridge. In Mautic UI, enable API and Basic Auth.
+
+---
+
 ## [0.1.0] - 2025-08-13
 
 ### Added
